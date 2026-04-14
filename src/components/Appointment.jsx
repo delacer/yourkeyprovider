@@ -20,52 +20,49 @@ const Appointment = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  // 1. Prepare the detailed message FIRST
-  // This ensures we have the data ready regardless of server errors
-  const detailedMessage = `*NEW ${requestType.toUpperCase()} REQUEST*%0a` +
-    `--------------------------%0a` +
-    `*Service:* ${formData.service}%0a` +
-    `*Name:* ${formData.name}%0a` +
-    `*Phone:* ${formData.phone}%0a` +
-    `*Location:* ${formData.location}%0a` +
-    (requestType === 'scheduled' 
-      ? `*Date:* ${formData.date}%0a*Time:* ${formData.time}` 
-      : `*Priority:* IMMEDIATE DISPATCH`);
+    // 1. Prepare the detailed message FIRST
+    const detailedMessage = `*NEW ${requestType.toUpperCase()} REQUEST*%0a` +
+      `--------------------------%0a` +
+      `*Service:* ${formData.service}%0a` +
+      `*Name:* ${formData.name}%0a` +
+      `*Phone:* ${formData.phone}%0a` +
+      `*Location:* ${formData.location}%0a` +
+      (requestType === 'scheduled' 
+        ? `*Date:* ${formData.date}%0a*Time:* ${formData.time}` 
+        : `*Priority:* IMMEDIATE DISPATCH`);
 
-  const whatsappNumber = "27837659945";
+    const whatsappNumber = "27837659945";
 
-  try {
-    const jobData = {
-      clientName: formData.name,
-      clientPhone: formData.phone,
-      address: formData.location,
-      serviceType: formData.service,
-      status: requestType === 'emergency' ? 'urgent' : 'pending',
-      scheduledTime: requestType === 'scheduled' 
-        ? `${formData.date} ${formData.time}` 
-        : new Date().toISOString()
-    };
+    try {
+      const jobData = {
+        clientName: formData.name,
+        clientPhone: formData.phone,
+        address: formData.location,
+        serviceType: formData.service,
+        status: requestType === 'emergency' ? 'urgent' : 'pending',
+        scheduledTime: requestType === 'scheduled' 
+          ? `${formData.date} ${formData.time}` 
+          : new Date().toISOString()
+      };
 
-    // 2. Attempt to sync with your database
-    const response = await fetch('/api/jobs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(jobData),
-    });
+      // 2. We removed "const response =" to prevent the Netlify build error
+      await fetch('/api/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(jobData),
+      });
 
-    // If the database sync works, we send the full message
-    window.open(`https://wa.me/${whatsappNumber}?text=${detailedMessage}`, '_blank');
+      window.open(`https://wa.me/${whatsappNumber}?text=${detailedMessage}`, '_blank');
 
-  } catch (error) {
-    console.error("Sync Error:", error);
-    
-    // 3. THE FIX: Even if the database fails, we now use 'detailedMessage' 
-    // instead of the old "Manual Inquiry" fallback.
-    window.open(`https://wa.me/${whatsappNumber}?text=${detailedMessage}`, '_blank');
-  }
-};
+    } catch (error) {
+      console.error("Sync Error:", error);
+      
+      // Still send the detailed message even if the database sync fails
+      window.open(`https://wa.me/${whatsappNumber}?text=${detailedMessage}`, '_blank');
+    }
+  };
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Locksmith",
