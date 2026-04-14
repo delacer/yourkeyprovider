@@ -19,13 +19,13 @@ const Navbar = () => {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": "https://yourkeyprovider.com/"
+        "item": "https://yourkeyprovider.netlify.app/"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": location.pathname.split('/')[1] || "Current",
-        "item": `https://yourkeyprovider.com${location.pathname}`
+        "item": `https://yourkeyprovider.netlify.app${location.pathname}`
       }
     ]
   };

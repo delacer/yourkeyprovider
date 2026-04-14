@@ -63,7 +63,7 @@ const Services = () => {
         <title>Professional Locksmith Services | Residential, Commercial & Auto</title>
         <meta name="description" content="Expert locksmith solutions in Cape Town. We specialize in residential rekeying, commercial access control, and automotive transponder programming." />
         <meta name="keywords" content="locksmith services Cape Town, car key replacement, commercial security Western Cape, 24/7 lockout" />
-        <link rel="canonical" href="https://yourkeyprovider.com/services" />
+        <link rel="canonical" href="https://yourkeyprovider.netlify.app/services" />
         <script type="application/ld+json">{JSON.stringify(servicesSchema)}</script>
       </Helmet>
     <div className="services-page">

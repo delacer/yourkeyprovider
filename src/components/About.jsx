@@ -31,7 +31,7 @@ const About = () => {
         <title>About Us | 14+ Years of Expert Locksmithing in Cape Town</title>
         <meta name="description" content="Learn about Your Key Provider Locksmiths. Over 14 years experience providing 24/7 emergency locksmith services and advanced security systems in South Africa." />
         <meta name="keywords" content="professional locksmith Cape Town, master key systems SA, car key programming experts" />
-        <link rel="canonical" href="https://yourwebsite.co.za/about" />
+        <link rel="canonical" href="https://yourkeyprovider.netlify.app/about" />
         <script type="application/ld+json">{JSON.stringify(aboutSchema)}</script>
       </Helmet>
     <div className="about-page">

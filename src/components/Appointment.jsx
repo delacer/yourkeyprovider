@@ -64,9 +64,9 @@ const Appointment = () => {
     "@context": "https://schema.org",
     "@type": "Locksmith",
     "name": "Your Key Provider Locksmiths",
-    "image": "https://yourkeyprovider.com/og-image.jpg", 
-    "@id": "https://yourkeyprovider.com",
-    "url": "https://yourkeyprovider.com",
+    "image": "https://yourkeyprovider.netlify.app/og-image.jpg", 
+    "@id": "https://yourkeyprovider.netlify.app",
+    "url": "https://yourkeyprovider.netlify.app",
     "telephone": "+27837659945",
     "address": {
       "@type": "PostalAddress",
@@ -93,7 +93,7 @@ const Appointment = () => {
         <title>24/7 Emergency Locksmith | 18min Arrival | Your Key Provider</title>
         <meta name="description" content="Fast 24-hour locksmith services in Cape Town. Specialized in house lockouts, car key programming, and smart lock installation. Get help now." />
         <meta name="keywords" content="locksmith Cape Town, emergency locksmith, car lockout, house lockout, smart lock installation" />
-        <link rel="canonical" href="https://yourkeyprovider.com/appointment" />
+        <link rel="canonical" href="https://yourkeyprovider.netlify.app/appointment" />
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 

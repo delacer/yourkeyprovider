@@ -13,17 +13,21 @@ const Contact = () => {
     message: ''
   });
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false); // Track success status
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Hide success message if they start typing again
+    if (success) setSuccess(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setSuccess(false);
 
     try {
-      const response = await fetch('http://localhost:3000/api/public/enquiry', {
+      const response = await fetch('https://yourkeyprovider-dashboard.vercel.app/api/public/enquiry', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -37,8 +41,16 @@ const Contact = () => {
       });
 
       if (response.ok) {
-        alert("Success! Your request has been sent to our team.");
-        setFormData({ firstName: '', lastName: '', phone: '', email: '', subject: 'General Inquiry', message: '' });
+        setSuccess(true); // Trigger success UI
+        // Clear the form fields
+        setFormData({ 
+          firstName: '', 
+          lastName: '', 
+          phone: '', 
+          email: '', 
+          subject: 'General Inquiry', 
+          message: '' 
+        });
       } else {
         throw new Error("Failed to send");
       }
@@ -54,7 +66,7 @@ const Contact = () => {
     "@type": "Locksmith",
     "name": "Your Key Provider Locksmiths",
     "description": "Contact our expert locksmith team in Cape Town for emergency lockouts, residential security, and commercial quotes.",
-    "url": "https://yourkeyprovider.com/contact",
+    "url": "https://yourkeyprovider.netlify.app/contact",
     "telephone": "+27837659945",
     "email": "mutakwastephen@gmail.com",
     "address": {
@@ -77,7 +89,7 @@ const Contact = () => {
         <title>Contact Us | Emergency Locksmith Cape Town & Kuilsriver</title>
         <meta name="description" content="Contact Your Key Provider Locksmiths for 24/7 emergency service in Kuilsriver and Cape Town. Get a free quote on residential and commercial security." />
         <meta name="keywords" content="contact locksmith Cape Town, locksmith Kuilsriver, emergency locksmith contact, security system quote" />
-        <link rel="canonical" href="https://yourkeyprovider.com/contact" />
+        <link rel="canonical" href="https://yourkeyprovider.netlify.app/contact" />
         <script type="application/ld+json">{JSON.stringify(contactSchema)}</script>
       </Helmet>
     <div className="contact-page">
@@ -221,6 +233,11 @@ const Contact = () => {
                 </>
               )}
             </button>
+            {success && (
+            <div className="success-banner">
+              <p>✅ Success! Your request has been sent to our team.</p>
+            </div>
+          )}
           </form>
         </div>
       </div>
