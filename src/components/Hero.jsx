@@ -40,6 +40,7 @@ const Hero = () => {
         <title>Your Key Provider | 24/7 Professional Locksmith Cape Town</title>
         <meta name="description" content="Expert locksmith services in Cape Town. 24/7 Emergency dispatch, residential security, and automotive key programming. 18-minute average arrival time." />
         <script type="application/ld+json">{JSON.stringify(heroSchema)}</script>
+        <link rel="canonical" href="https://yourkeyprovider.netlify.app/" />
       </Helmet>
 
       <section className="hero-wrapper">
