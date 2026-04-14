@@ -20,8 +20,23 @@ const Appointment = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
+  // 1. Prepare the detailed message FIRST
+  // This ensures we have the data ready regardless of server errors
+  const detailedMessage = `*NEW ${requestType.toUpperCase()} REQUEST*%0a` +
+    `--------------------------%0a` +
+    `*Service:* ${formData.service}%0a` +
+    `*Name:* ${formData.name}%0a` +
+    `*Phone:* ${formData.phone}%0a` +
+    `*Location:* ${formData.location}%0a` +
+    (requestType === 'scheduled' 
+      ? `*Date:* ${formData.date}%0a*Time:* ${formData.time}` 
+      : `*Priority:* IMMEDIATE DISPATCH`);
+
+  const whatsappNumber = "27837659945";
+
+  try {
     const jobData = {
       clientName: formData.name,
       clientPhone: formData.phone,
@@ -33,33 +48,24 @@ const Appointment = () => {
         : new Date().toISOString()
     };
 
-    try {
-      const response = await fetch('/api/jobs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(jobData),
-      });
+    // 2. Attempt to sync with your database
+    const response = await fetch('/api/jobs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(jobData),
+    });
 
-      if (!response.ok) throw new Error("Database sync failed");
+    // If the database sync works, we send the full message
+    window.open(`https://wa.me/${whatsappNumber}?text=${detailedMessage}`, '_blank');
 
-      const whatsappNumber = "27837659945";
-      const message = `*NEW ${requestType.toUpperCase()} REQUEST*%0a` +
-                      `--------------------------%0a` +
-                      `*Service:* ${formData.service}%0a` +
-                      `*Name:* ${formData.name}%0a` +
-                      `*Phone:* ${formData.phone}%0a` +
-                      `*Location:* ${formData.location}%0a` +
-                      (requestType === 'scheduled' 
-                        ? `*Date:* ${formData.date}%0a*Time:* ${formData.time}` 
-                        : `*Priority:* IMMEDIATE DISPATCH`);
-
-      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, '_blank');
-
-    } catch (error) {
-      console.error("Sync Error:", error);
-      window.open(`https://wa.me/27837659945?text=Manual Inquiry from ${formData.name}`, '_blank');
-    }
-  };
+  } catch (error) {
+    console.error("Sync Error:", error);
+    
+    // 3. THE FIX: Even if the database fails, we now use 'detailedMessage' 
+    // instead of the old "Manual Inquiry" fallback.
+    window.open(`https://wa.me/${whatsappNumber}?text=${detailedMessage}`, '_blank');
+  }
+};
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Locksmith",

@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async'; 
-import { useLocation } from 'react-router-dom';
 import './Contact.css';
 import { Mail, Phone, MapPin, MessageSquare, Clock, ArrowRight, Loader2 } from 'lucide-react';
 
 const Contact = () => {
-  const reactLocation = useLocation(); // Renamed to avoid the global conflict
-const isContactPage = reactLocation.pathname === '/contact';
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -88,14 +85,13 @@ const isContactPage = reactLocation.pathname === '/contact';
 
   return (
     <>
-      {isContactPage && (
-        <Helmet>
-          <title>Contact Us | Emergency Locksmith Cape Town & Kuilsriver</title>
-          <meta name="description" content="Contact Your Key Provider Locksmiths for 24/7 emergency service..." />
-          <link rel="canonical" href="https://yourkeyprovider.netlify.app/contact" />
-          <script type="application/ld+json">{JSON.stringify(contactSchema)}</script>
-        </Helmet>
-      )}
+      <Helmet>
+        <title>Contact Us | Emergency Locksmith Cape Town & Kuilsriver</title>
+        <meta name="description" content="Contact Your Key Provider Locksmiths for 24/7 emergency service in Kuilsriver and Cape Town. Get a free quote on residential and commercial security." />
+        <meta name="keywords" content="contact locksmith Cape Town, locksmith Kuilsriver, emergency locksmith contact, security system quote" />
+        <link rel="canonical" href="https://yourkeyprovider.netlify.app/contact" />
+        <script type="application/ld+json">{JSON.stringify(contactSchema)}</script>
+      </Helmet>
     <div className="contact-page">
       <div className="bg-glow-bottom"></div>
       
