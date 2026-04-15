@@ -10,6 +10,7 @@ import Contact from "./components/Contact";
 import Appointment from "./components/Appointment";
 import Footer from "./components/Footer";
 import Testimonials from "./components/Testimonials";
+import Gallery from './components/Gallery';
 import PrivacyPolicy from "./components/PrivacyPolicy";
 import Terms from "./components/Terms";
 import './App.css';
@@ -62,6 +63,10 @@ function App() {
                   <section id="testimonial" className="section-padding">
                     <Testimonials />
                   </section>
+                  <section id="gallery" className="section-padding">
+                    <Gallery />
+                  </section>
+
 
                   <section id="contact-home" className="section-padding">
                     <Contact />

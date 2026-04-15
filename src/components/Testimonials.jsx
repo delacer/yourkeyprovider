@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Star, Quote, CheckCircle } from 'lucide-react';
 import './Testimonials.css';
 
-const reviews = [
+const initialReviews = [
   {
     id: 1,
     name: "Sarah Jenkins",
@@ -39,7 +39,17 @@ const reviews = [
 ];
 
 const Testimonials = () => {
+  const [reviews, setReviews] = useState(initialReviews);
+  const [formData, setFormData] = useState({
+    name: '',
+    role: '',
+    location: '',
+    text: '',
+    rating: 5
+  });
+
   const displayReviews = [...reviews, ...reviews];
+
   const testimonialSchema = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -55,9 +65,24 @@ const Testimonials = () => {
       "reviewBody": r.text,
       "reviewRating": {
         "@type": "Rating",
-        "ratingValue": "5"
+        "ratingValue": r.rating.toString()
       }
     }))
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newReview = {
+      id: reviews.length + 1,
+      ...formData
+    };
+    setReviews(prev => [newReview, ...prev]);
+    setFormData({ name: '', role: '', location: '', text: '', rating: 5 });
   };
 
   return (
@@ -106,6 +131,53 @@ const Testimonials = () => {
               </figure>
             ))}
           </div>
+        </div>
+
+        {/* Review Form */}
+        <div className="testimonial-form">
+          <h3>Share Your Experience</h3>
+          <form onSubmit={handleSubmit}>
+            <input 
+              type="text" 
+              name="name" 
+              placeholder="Your Name" 
+              value={formData.name} 
+              onChange={handleChange} 
+              required 
+            />
+            <input 
+              type="text" 
+              name="role" 
+              placeholder="Your Role (e.g. Homeowner)" 
+              value={formData.role} 
+              onChange={handleChange} 
+              required 
+            />
+            <input 
+              type="text" 
+              name="location" 
+              placeholder="Your Location" 
+              value={formData.location} 
+              onChange={handleChange} 
+              required 
+            />
+            <textarea 
+              name="text" 
+              placeholder="Your Testimonial" 
+              value={formData.text} 
+              onChange={handleChange} 
+              required 
+            />
+            <label>
+              Rating:
+              <select name="rating" value={formData.rating} onChange={handleChange}>
+                {[1,2,3,4,5].map(num => (
+                  <option key={num} value={num}>{num}</option>
+                ))}
+              </select>
+            </label>
+            <button type="submit">Submit Review</button>
+          </form>
         </div>
       </section>
     </>
