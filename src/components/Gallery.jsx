@@ -1,88 +1,114 @@
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async'
-import './Gallery.css';
+import React, { useState, useEffect } from "react";
+import { Helmet } from "react-helmet-async";
+import "./Gallery.css";
 
 const Gallery = () => {
   const [gallery, setGallery] = useState([]);
-  const [formData, setFormData] = useState({ file: null, caption: '' });
 
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'file') {
-      setFormData(prev => ({ ...prev, file: files[0] }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
-  };
+  // 1. UPDATE: Your Live Render Backend URL
+  const API_URL = "https://yourkeyproviderbackend.onrender.com/gallery/";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.file) return;
-    const newItem = {
-      id: gallery.length + 1,
-      url: URL.createObjectURL(formData.file),
-      caption: formData.caption
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error("Network response was not ok");
+        const data = await response.json();
+        setGallery(data);
+      } catch (err) {
+        console.error("Failed to load gallery from live server:", err);
+      }
     };
-    setGallery(prev => [newItem, ...prev]);
-    setFormData({ file: null, caption: '' });
+    fetchGallery();
+  }, [API_URL]);
+
+  const handleUpload = () => {
+    // Admin check
+    const password = prompt("Enter Admin Password to upload:");
+    if (!password) return;
+
+    // Ensure Cloudinary is loaded from the window object
+    if (!window.cloudinary) {
+      alert("Cloudinary script not loaded yet. Please refresh the page.");
+      return;
+    }
+
+    window.cloudinary.openUploadWidget(
+      {
+        cloudName: "ddtaic15q",
+        uploadPreset: "gallery-preset",
+      },
+      async (error, result) => {
+        if (!error && result && result.event === "success") {
+          const newPhotoData = {
+            image_url: result.info.secure_url,
+            caption: result.info.original_filename
+          };
+
+          // Send to LIVE backend with the password header
+          try {
+            const saveResponse = await fetch(API_URL, {
+              method: "POST",
+              headers: { 
+                "Content-Type": "application/json",
+                "X-Admin-Token": password 
+              },
+              body: JSON.stringify(newPhotoData),
+            });
+
+            if (saveResponse.status === 403) {
+              alert("Unauthorized: Incorrect Password");
+              return;
+            }
+
+            if (saveResponse.ok) {
+              const savedItem = await saveResponse.json();
+              // Add new photo to the top of the gallery immediately
+              setGallery(prev => [savedItem, ...prev]);
+            }
+          } catch (err) {
+            console.error("Error saving to live database:", err);
+          }
+        }
+      }
+    );
   };
 
   return (
     <>
-    <Helmet>
-  <title>Your Key Provider Locksmiths - Work Gallery</title>
-  <meta name="description" content="Browse our locksmith work gallery showcasing completed projects in Cape Town and surrounding areas." />
-  <script type="application/ld+json">
-    {JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "ImageGallery",
-      "name": "Your Key Provider Locksmiths Work Gallery",
-      "image": gallery.map(item => item.url),
-      "description": "Gallery of locksmith projects completed in Cape Town, Bellville, Stellenbosch, and Kuilsriver."
-    })}
-  </script>
-</Helmet>
-    <section className="gallery-section">
-      <div className="gallery-header">
-        <h2>Our Work Gallery</h2>
-        <p className="gallery-desc">A showcase of projects we’ve completed for clients.</p>
-      </div>
+      <Helmet>
+        <title>Your Key Provider Locksmiths - Work Gallery</title>
+        <meta name="description" content="Browse our locksmith work gallery." />
+      </Helmet>
 
-      {/* Carousel */}
-      <div className="gallery-viewport" aria-live="off">
-        <div className="gallery-track">
-          {[...gallery, ...gallery].map((item, index) => (
-            <figure key={index} className="gallery-card" aria-hidden={index >= gallery.length}>
-              <img src={item.url} alt={`Locksmith project - ${item.caption}`} />
-              <figcaption>{item.caption}</figcaption>
-            </figure>
-          ))}
+      <section className="gallery-section">
+        <div className="gallery-header">
+          <h2>Our Work Gallery</h2>
+          <p className="gallery-desc">A showcase of projects we’ve completed.</p>
         </div>
-      </div>
 
-      {/* Upload Form */}
-      <div className="gallery-form">
-        <h3>Upload Your Work</h3>
-        <form onSubmit={handleSubmit}>
-          <input 
-            type="file" 
-            name="file" 
-            accept="image/*" 
-            onChange={handleChange} 
-            required 
-          />
-          <input 
-            type="text" 
-            name="caption" 
-            placeholder="Caption" 
-            value={formData.caption} 
-            onChange={handleChange} 
-            required 
-          />
-          <button type="submit">Add to Gallery</button>
-        </form>
-      </div>
-    </section>
+        <div className="gallery-viewport">
+          <div className="gallery-track">
+            {gallery.length > 0 ? (
+              gallery.map((item) => (
+                <figure key={item.id} className="gallery-card">
+                  <img src={item.image_url} alt={item.caption} />
+                  <figcaption>{item.caption}</figcaption>
+                </figure>
+              ))
+            ) : (
+              <p className="no-photos">No photos uploaded yet. Be the first!</p>
+            )}
+          </div>
+        </div>
+
+        <div className="gallery-form">
+          <h3>Admin Controls</h3>
+          <button onClick={handleUpload} className="upload-btn">
+            Upload to Gallery
+          </button>
+        </div>
+      </section>
     </>
   );
 };

@@ -1,186 +1,167 @@
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet-async';
+import React, { useState, useEffect } from 'react';
 import { Star, Quote, CheckCircle } from 'lucide-react';
 import './Testimonials.css';
 
 const initialReviews = [
   {
-    id: 1,
-    name: "Sarah Jenkins",
+    id: 's1',
+    author: "Sarah Jenkins",
     role: "Homeowner",
     location: "Cape Town",
-    text: "Locked myself out at 2 AM. They were here in 15 minutes and had me back inside in under 5. Professional and fast!",
-    rating: 5
+    rating: 5,
+    content: "Locked myself out at 2 AM. They were here in 15 minutes and had me back inside in under 5. Professional and fast!"
   },
   {
-    id: 2,
-    name: "Mark Thompson",
+    id: 's2',
+    author: "Mark Thompson",
     role: "Business Manager",
     location: "Bellville",
-    text: "Upgraded our entire office to biometric locks. The team was knowledgeable and the installation was incredibly clean.",
-    rating: 5
+    rating: 5,
+    content: "Upgraded our entire office to biometric locks. The team was knowledgeable and the installation was incredibly clean."
   },
   {
-    id: 3,
-    name: "David Rodriguez",
+    id: 's3',
+    author: "David Rodriguez",
     role: "Car Owner",
     location: "Stellenbosch",
-    text: "Lost my only car fob. Other places told me a week—Your Key Provider made me a new one on the spot. Saved my week!",
-    rating: 5
+    rating: 5,
+    content: "Lost my only car fob. Other places told me a week—Your Key Provider made me a new one on the spot. Saved my week!"
   },
   {
-    id: 4,
-    name: "Elena Rossi",
+    id: 's4',
+    author: "Elena Rossi",
     role: "Property Manager",
     location: "Kuilsriver",
-    text: "Reliable, honest, and fair pricing. I use them for all my rental properties. Best locksmith in the Western Cape.",
-    rating: 5
+    rating: 5,
+    content: "Reliable, honest, and fair pricing. I use them for all my rental properties. Best locksmith in the Western Cape."
   }
 ];
 
 const Testimonials = () => {
-  const [reviews, setReviews] = useState(initialReviews);
+  const [dbReviews, setDbReviews] = useState([]);
   const [formData, setFormData] = useState({
-    name: '',
+    author: '',
     role: '',
     location: '',
-    text: '',
+    content: '',
     rating: 5
   });
 
-  const displayReviews = [...reviews, ...reviews];
+  // 1. UPDATE: Live Render Backend URL
+  const API_URL = "https://yourkeyproviderbackend.onrender.com/reviews/";
 
-  const testimonialSchema = {
-    "@context": "https://schema.org",
-    "@type": "LocalBusiness",
-    "name": "Your Key Provider Locksmiths",
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "5",
-      "reviewCount": reviews.length.toString()
-    },
-    "review": reviews.map(r => ({
-      "@type": "Review",
-      "author": { "@type": "Person", "name": r.name },
-      "reviewBody": r.text,
-      "reviewRating": {
-        "@type": "Rating",
-        "ratingValue": r.rating.toString()
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await fetch(API_URL);
+        if (response.ok) {
+          const data = await response.json();
+          setDbReviews(data);
+        }
+      } catch (err) {
+        console.error("Failed to load reviews from live database:", err);
       }
-    }))
-  };
+    };
+    fetchReviews();
+  }, []);
+
+  const allReviews = [...dbReviews, ...initialReviews];
+  const displayReviews = [...allReviews, ...allReviews];
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newReview = {
-      id: reviews.length + 1,
-      ...formData
-    };
-    setReviews(prev => [newReview, ...prev]);
-    setFormData({ name: '', role: '', location: '', text: '', rating: 5 });
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        const savedReview = await response.json();
+        setDbReviews(prev => [savedReview, ...prev]);
+        setFormData({ author: '', role: '', location: '', content: '', rating: 5 });
+      }
+    } catch (err) {
+      console.error("Error saving review:", err);
+    }
   };
 
   return (
-    <>
-      <Helmet>
-        <script type="application/ld+json">{JSON.stringify(testimonialSchema)}</script>
-      </Helmet>
+    <section className="testimonials-section">
+      <div className="testimonials-header">
+        <span className="section-label">TRUSTED BY HUNDREDS</span>
+        <h2>Client <span>Success Stories</span></h2>
+        <p className="section-desc">See why homeowners and businesses in <strong>Cape Town</strong> trust us.</p>
+      </div>
 
-      <section className="testimonials-section" aria-labelledby="testimonials-title">
-        <div className="testimonials-header">
-          <span className="section-label">TRUSTED BY HUNDREDS</span>
-          <h2 id="testimonials-title">Client <span>Success Stories</span></h2>
-          <p className="section-desc">See why homeowners and businesses in <strong>Cape Town</strong> trust us for their security.</p>
-        </div>
-
-        <div className="carousel-viewport" aria-live="off">
-          <div className="carousel-track">
-            {displayReviews.map((review, index) => (
-              <figure 
-                key={index} 
-                className="testimonial-card"
-                aria-hidden={index >= reviews.length}
-              >
-                <div className="card-top">
-                  <div className="star-rating" aria-label={`Rated ${review.rating} out of 5 stars`}>
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Star key={i} size={14} fill="#fbbf24" color="#fbbf24" aria-hidden="true" />
-                    ))}
-                  </div>
-                  <Quote size={24} className="quote-icon" aria-hidden="true" />
+      <div className="carousel-viewport">
+        <div className="carousel-track">
+          {displayReviews.map((review, index) => (
+            <figure key={index} className="testimonial-card">
+              <div className="card-top">
+                <div className="star-rating">
+                  {[...Array(Number(review.rating))].map((_, i) => (
+                    <Star key={i} size={14} fill="#fbbf24" color="#fbbf24" />
+                  ))}
                 </div>
+                <Quote size={24} className="quote-icon" />
+              </div>
 
-                <blockquote className="testimonial-text">
-                  <p>"{review.text}"</p>
-                </blockquote>
+              <blockquote className="testimonial-text">
+                <p>"{review.content}"</p>
+              </blockquote>
 
-                <figcaption className="testimonial-footer">
-                  <div className="user-info">
-                    <strong>{review.name}</strong>
-                    <span>{review.role} • {review.location}</span>
-                  </div>
-                  <div className="verified-badge">
-                    <CheckCircle size={12} aria-hidden="true" /> Verified 
-                  </div>
-                </figcaption>
-              </figure>
-            ))}
-          </div>
+              <figcaption className="testimonial-footer">
+                <div className="user-info">
+                  <strong>{review.author}</strong>
+                  <span>{review.role} • {review.location}</span>
+                </div>
+                <div className="verified-badge">
+                  <CheckCircle size={12} /> Verified 
+                </div>
+              </figcaption>
+            </figure>
+          ))}
         </div>
+      </div>
 
-        {/* Review Form */}
-        <div className="testimonial-form">
-          <h3>Share Your Experience</h3>
-          <form onSubmit={handleSubmit}>
-            <input 
-              type="text" 
-              name="name" 
-              placeholder="Your Name" 
-              value={formData.name} 
-              onChange={handleChange} 
-              required 
-            />
-            <input 
-              type="text" 
-              name="role" 
-              placeholder="Your Role (e.g. Homeowner)" 
-              value={formData.role} 
-              onChange={handleChange} 
-              required 
-            />
-            <input 
-              type="text" 
-              name="location" 
-              placeholder="Your Location" 
-              value={formData.location} 
-              onChange={handleChange} 
-              required 
-            />
-            <textarea 
-              name="text" 
-              placeholder="Your Testimonial" 
-              value={formData.text} 
-              onChange={handleChange} 
-              required 
-            />
-            <label>
-              Rating:
-              <select name="rating" value={formData.rating} onChange={handleChange}>
-                {[1,2,3,4,5].map(num => (
-                  <option key={num} value={num}>{num}</option>
-                ))}
-              </select>
-            </label>
-            <button type="submit">Submit Review</button>
-          </form>
-        </div>
-      </section>
-    </>
+      <div className="testimonial-form">
+        <h3>Share Your Experience</h3>
+        <form onSubmit={handleSubmit}>
+          <input 
+            type="text" name="author" placeholder="Your Name" 
+            value={formData.author} onChange={handleChange} required 
+          />
+          <input 
+            type="text" name="role" placeholder="Your Role (e.g. Homeowner)" 
+            value={formData.role} onChange={handleChange} required 
+          />
+          <input 
+            type="text" name="location" placeholder="Your Location" 
+            value={formData.location} onChange={handleChange} required 
+          />
+          <textarea 
+            name="content" placeholder="Your Testimonial" 
+            value={formData.content} onChange={handleChange} required 
+          />
+          <label className="rating-label">
+            Rating:
+            <select name="rating" value={formData.rating} onChange={handleChange}>
+              {[5,4,3,2,1].map(num => (
+                <option key={num} value={num}>{num} Stars</option>
+              ))}
+            </select>
+          </label>
+          <button type="submit">Submit Review</button>
+        </form>
+      </div>
+    </section>
   );
 };
 
