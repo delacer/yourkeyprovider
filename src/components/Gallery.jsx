@@ -22,14 +22,34 @@ const Gallery = () => {
     fetchGallery();
   }, [API_URL]);
 
-  const handleUpload = () => {
-    // Admin check
+  const handleUpload = async () => {
     const password = prompt("Enter Admin Password to upload:");
     if (!password) return;
 
-    // Ensure Cloudinary is loaded from the window object
+    // --- STEP 1: PRE-VERIFICATION ---
+    try {
+      // We send a dummy 'ping' to the backend to verify the token
+      const verifyResponse = await fetch(API_URL, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "X-Admin-Token": password 
+        },
+        body: JSON.stringify({ image_url: "ping", caption: "auth_check" }), 
+      });
+
+      if (verifyResponse.status === 403) {
+        alert("Unauthorized: Incorrect Password. Access Denied.");
+        return; // Stops here if password is wrong
+      }
+    } catch (err) {
+      console.error("Auth check failed:", err);
+      return;
+    }
+
+    // --- STEP 2: OPEN WIDGET (Only if password was correct) ---
     if (!window.cloudinary) {
-      alert("Cloudinary script not loaded yet. Please refresh the page.");
+      alert("Cloudinary script not loaded yet.");
       return;
     }
 
@@ -45,7 +65,6 @@ const Gallery = () => {
             caption: result.info.original_filename
           };
 
-          // Send to LIVE backend with the password header
           try {
             const saveResponse = await fetch(API_URL, {
               method: "POST",
@@ -56,14 +75,8 @@ const Gallery = () => {
               body: JSON.stringify(newPhotoData),
             });
 
-            if (saveResponse.status === 403) {
-              alert("Unauthorized: Incorrect Password");
-              return;
-            }
-
             if (saveResponse.ok) {
               const savedItem = await saveResponse.json();
-              // Add new photo to the top of the gallery immediately
               setGallery(prev => [savedItem, ...prev]);
             }
           } catch (err) {
@@ -103,7 +116,6 @@ const Gallery = () => {
         </div>
 
         <div className="gallery-form">
-          <h3>Admin Controls</h3>
           <button onClick={handleUpload} className="upload-btn">
             Upload to Gallery
           </button>
