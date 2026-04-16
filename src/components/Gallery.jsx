@@ -150,7 +150,6 @@ const Gallery = () => {
                   </button>
 
                   <img src={item.image_url} alt={item.caption} />
-                  <figcaption>{item.caption}</figcaption>
                 </figure>
               ))
             ) : (
