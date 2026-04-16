@@ -114,3 +114,25 @@
 .gallery-form button:hover {
   background: #2563eb;
 }
+.delete-photo-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(220, 38, 38, 0.8); /* Red */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  z-index: 10;
+  transition: background 0.3s;
+}
+
+.delete-photo-btn:hover {
+  background: rgb(220, 38, 38);
+}
